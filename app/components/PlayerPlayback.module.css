@@ -1,8 +1,62 @@
+/* PlayerPlayback.module.css */
 .controls {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 20px; /* Adjust gap for spacing between controls */
+  margin-top: 15px;
 }
 
 .controls button {
-  padding: 3px 5px;
+  padding: 10px 20px; /* Increased padding for larger buttons */
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: white;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+}
+
+.controls button:hover {
+  background: linear-gradient(135deg, #a777e3, #6e8efb);
+  transform: scale(1.05);
+}
+
+.controls button:active {
+  transform: scale(0.95);
+}
+
+.speedBoxContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center items horizontally */
+  background: rgba(255, 255, 255, 0.1);
+  padding: 5px; /* Reduced padding */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 120px; /* Adjust width to make it smaller */
+  height: 60px; /* Set a fixed height for better alignment */
+}
+
+.speedBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Center items vertically */
+  gap: 4px;
+  height: 100%; /* Ensure it takes full height of the container */
+}
+
+.speedBox label {
+  font-size: 10px; /* Reduced font size */
+  font-weight: bold;
+  color: #555;
+}
+
+.speedSlider {
+  width: 80px; /* Reduced width */
+  cursor: pointer;
 }
