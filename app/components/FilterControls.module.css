@@ -1,0 +1,63 @@
+.filterCard {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+}
+
+.filterTitle {
+    color: #ddd;
+    font-size: 16px;
+    margin: 0 0 12px 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+.filterRow {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filterSelect {
+    width: 100%;
+    padding: 8px 12px;
+    background: #3a3a4a;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.filterLabel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #b8b8c0;
+    font-size: 13px;
+    width: 100%;
+}
+
+.filterSlider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #3a3a4a;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.filterSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #6e8efb;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}

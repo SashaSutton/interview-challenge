@@ -4,6 +4,7 @@ import { FilePicker } from "./FilePicker";
 import { readFile } from "../util";
 import { AudioContextContext } from "./AudioContextProvider";
 import { PlayerPlayback } from "./PlayerPlayback";
+import styles from "./Player.module.css";
 
 export const Player: FC = () => {
   const [context, setContext] = useState<AudioContext | null>(null);
@@ -18,14 +19,14 @@ export const Player: FC = () => {
   }, []);
 
   const onFileSelect = useCallback(
-    async (file: File) => {
-      if (context) {
-        const bytes = await readFile(file);
-        const buffer = await context.decodeAudioData(bytes);
-        setAudioBuffer(buffer);
-      }
-    },
-    [context],
+      async (file: File) => {
+        if (context) {
+          const bytes = await readFile(file);
+          const buffer = await context.decodeAudioData(bytes);
+          setAudioBuffer(buffer);
+        }
+      },
+      [context],
   );
 
   if (!context) {
@@ -33,9 +34,13 @@ export const Player: FC = () => {
   }
 
   return (
-    <AudioContextContext.Provider value={context}>
-      <FilePicker onFileSelect={onFileSelect} />
-      <PlayerPlayback context={context} audioBuffer={audioBuffer} />
-    </AudioContextContext.Provider>
+      <div className={styles.playerContainer}>
+        <AudioContextContext.Provider value={context}>
+          <FilePicker onFileSelect={onFileSelect} />
+          {audioBuffer && (
+              <PlayerPlayback context={context} audioBuffer={audioBuffer} />
+          )}
+        </AudioContextContext.Provider>
+      </div>
   );
 };

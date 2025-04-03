@@ -1,18 +1,22 @@
 import { FC, useEffect, useState, useRef } from "react";
 import styles from "./PlaybackBar.module.css";
 
+type StoppedState = {
+  state: "stopped";
+  positionMilliseconds: number;
+};
+
+type PlayingState = {
+  state: "playing";
+  effectiveStartTimeMilliseconds: number;
+};
+
+type PlaybackState = StoppedState | PlayingState;
+
 type PlaybackBarProps = {
   totalTimeMilliseconds: number;
-  state:
-      | {
-    state: "stopped";
-    positionMilliseconds: number;
-  }
-      | {
-    state: "playing";
-    effectiveStartTimeMilliseconds: number;
-  };
-  onSeek: (timeMillis: number) => void; // Callback for seeking
+  state: PlaybackState;
+  onSeek: (timeMillis: number) => void;
 };
 
 const formatMillis = (timeMillis: number) => {
@@ -26,57 +30,70 @@ export const PlaybackBar: FC<PlaybackBarProps> = ({
                                                     state,
                                                     onSeek,
                                                   }) => {
-  const [positionMilliseconds, setPositionMilliseconds] = useState(0);
+  const initialPosition = state.state === "stopped"
+      ? state.positionMilliseconds
+      : Date.now() - state.effectiveStartTimeMilliseconds;
+
+  const [visualPosition, setVisualPosition] = useState(initialPosition);
   const barRef = useRef<HTMLDivElement>(null);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
     if (state.state === "stopped") {
-      setPositionMilliseconds(state.positionMilliseconds);
-    } else {
-      let animationFrameId: number = -1;
-
-      const updatePosition = () => {
-        const now = Date.now();
-        const elapsedTime = now - state.effectiveStartTimeMilliseconds;
-        setPositionMilliseconds(elapsedTime);
-        animationFrameId = requestAnimationFrame(updatePosition);
-      };
-
-      updatePosition();
-
-      return () => {
-        cancelAnimationFrame(animationFrameId);
-      };
+      setVisualPosition((state as StoppedState).positionMilliseconds);
     }
+  }, [state.state, state.state === "stopped" ? (state as StoppedState).positionMilliseconds : null]);
+
+  useEffect(() => {
+    if (state.state !== "playing") return;
+
+    let animationFrameId: number;
+    const updatePosition = () => {
+      const now = Date.now();
+      const elapsedTime = now - (state as PlayingState).effectiveStartTimeMilliseconds;
+      setVisualPosition(elapsedTime);
+      animationFrameId = requestAnimationFrame(updatePosition);
+    };
+
+    updatePosition();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   }, [state]);
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (barRef.current) {
-      const rect = barRef.current.getBoundingClientRect();
-      const offsetX = event.clientX - rect.left;
-      const percentage = Math.min(Math.max(offsetX / rect.width, 0), 1);
-      const time = percentage * totalTimeMilliseconds;
-      setHoverTime(time);
-    }
-  };
-
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (barRef.current) {
-      const rect = barRef.current.getBoundingClientRect();
-      const offsetX = event.clientX - rect.left;
-      const percentage = Math.min(Math.max(offsetX / rect.width, 0), 1);
-      const time = percentage * totalTimeMilliseconds;
-      onSeek(time);
-    }
+    if (!barRef.current || !totalTimeMilliseconds) return;
+
+    const rect = barRef.current.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const percentage = Math.min(Math.max(offsetX / rect.width, 0), 1);
+    const time = Math.floor(percentage * totalTimeMilliseconds);
+
+    setVisualPosition(time);
+    onSeek(time);
   };
 
-  const positionPercentage = Math.min((positionMilliseconds / totalTimeMilliseconds) * 100, 100);
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!barRef.current || !totalTimeMilliseconds) return;
+
+    const rect = barRef.current.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const percentage = Math.min(Math.max(offsetX / rect.width, 0), 1);
+    const time = Math.floor(percentage * totalTimeMilliseconds);
+    setHoverTime(time);
+  };
+
+  const positionPercentage = Math.min(
+      (visualPosition / totalTimeMilliseconds) * 100,
+      100
+  );
 
   return (
       <div className={styles.wrapper}>
         <div className={styles.meta}>
-          <div>{formatMillis(positionMilliseconds)}</div>
+          <div>{formatMillis(visualPosition)}</div>
           <div>{formatMillis(totalTimeMilliseconds)}</div>
         </div>
         <div
@@ -84,12 +101,25 @@ export const PlaybackBar: FC<PlaybackBarProps> = ({
             ref={barRef}
             onMouseMove={handleMouseMove}
             onClick={handleClick}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => {
+              setIsHovering(false);
+              setHoverTime(null);
+            }}
         >
           <div className={styles.bar}>
-            <div className={styles.progress} style={{ width: `${positionPercentage}%` }} />
-            {hoverTime !== null && (
-                <div className={styles.hoverTime} style={{ left: `${(hoverTime / totalTimeMilliseconds) * 100}%` }}>
-                  {formatMillis(hoverTime)}
+            <div
+                className={styles.progress}
+                style={{ width: `${positionPercentage}%` }}
+            />
+            {isHovering && hoverTime !== null && (
+                <div
+                    className={styles.hoverIndicator}
+                    style={{ left: `${(hoverTime / totalTimeMilliseconds) * 100}%` }}
+                >
+                  <div className={styles.hoverTime}>
+                    {formatMillis(hoverTime)}
+                  </div>
                 </div>
             )}
           </div>

@@ -1,0 +1,24 @@
+.filePicker {
+    display: inline-flex;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin: 0 auto 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.filePicker:hover {
+    background: linear-gradient(135deg, #7e9efb, #b787e3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.fileInput {
+    display: none;
+}

@@ -1,0 +1,13 @@
+.playerContainer {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #1e1e2e;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}

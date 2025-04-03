@@ -1,5 +1,6 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { PlaybackBar } from "./PlaybackBar";
+import { FilterControls } from "./FilterControls";
 import styles from "./PlayerPlayback.module.css";
 
 type PlayerPlaybackProps = {
@@ -8,124 +9,124 @@ type PlayerPlaybackProps = {
 };
 
 type PlaybackState =
-    | {
-  state: "stopped";
-  positionMilliseconds: number;
-}
-    | {
-  state: "playing";
-  effectiveStartTimeMilliseconds: number;
-  source: AudioBufferSourceNode;
-};
+    | { state: "stopped"; positionMilliseconds: number }
+    | { state: "playing"; effectiveStartTimeMilliseconds: number; source: AudioBufferSourceNode };
 
-export const PlayerPlayback: FC<PlayerPlaybackProps> = ({
-                                                          context,
-                                                          audioBuffer,
-                                                        }) => {
+export const PlayerPlayback: FC<PlayerPlaybackProps> = ({ context, audioBuffer }) => {
   const [playbackState, setPlaybackState] = useState<PlaybackState>({
     state: "stopped",
     positionMilliseconds: 0,
   });
-
   const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [filterType, setFilterType] = useState<"lowpass" | "highpass">("lowpass");
+  const [filterFrequency, setFilterFrequency] = useState<number>(1000);
+  const filterEnabled = useRef<boolean>(false);
+  const gainNode = useRef<GainNode | null>(null);
+  const filterNode = useRef<BiquadFilterNode | null>(null);
 
   useEffect(() => {
-    setPlaybackState({
-      state: "stopped",
-      positionMilliseconds: 0,
-    });
-    setPlaybackRate(1);
-  }, [audioBuffer]);
+    gainNode.current = context.createGain();
+    filterNode.current = context.createBiquadFilter();
+    filterNode.current.type = filterType;
+    filterNode.current.frequency.value = filterFrequency;
+    gainNode.current.connect(context.destination);
+  }, [context]);
+
+  useEffect(() => {
+    if (filterNode.current) {
+      filterNode.current.type = filterType;
+    }
+  }, [filterType]);
+
+  useEffect(() => {
+    if (filterNode.current) {
+      filterNode.current.frequency.value = filterFrequency;
+    }
+  }, [filterFrequency]);
 
   const play = useCallback(() => {
-    if (!audioBuffer) {
+    if (!audioBuffer || playbackState.state === "playing") {
       return;
     }
-
-    if (playbackState.state === "playing") {
-      return;
-    }
-
     const source = context.createBufferSource();
     source.buffer = audioBuffer;
     source.playbackRate.value = playbackRate;
-
-    const effectiveStartTimeMilliseconds =
-        Date.now() - playbackState.positionMilliseconds;
-
-    source.connect(context.destination);
+    if (filterEnabled.current && filterNode.current && gainNode.current) {
+      source.connect(filterNode.current);
+      filterNode.current.connect(gainNode.current);
+    } else if (gainNode.current) {
+      source.connect(gainNode.current);
+    }
+    const effectiveStartTimeMilliseconds = Date.now() - playbackState.positionMilliseconds;
     source.start(0, playbackState.positionMilliseconds / 1000);
-
     setPlaybackState({
       state: "playing",
       effectiveStartTimeMilliseconds,
       source,
     });
-  }, [context, audioBuffer, playbackState, playbackRate]);
+  }, [audioBuffer, playbackRate, playbackState, context]);
 
-  const stopAndGoTo = useCallback(
-      (goToPositionMillis?: number) => {
-        if (playbackState.state === "stopped") {
-          if (goToPositionMillis !== undefined) {
-            setPlaybackState({
-              state: "stopped",
-              positionMilliseconds: goToPositionMillis,
-            });
-          }
+  const handleSeek = useCallback(
+      (goToPositionMillis: number) => {
+        if (!audioBuffer || playbackState.state !== "playing") {
+          setPlaybackState({
+            state: "stopped",
+            positionMilliseconds: goToPositionMillis,
+          });
           return;
         }
-        const positionMilliseconds =
-            goToPositionMillis ??
-            Date.now() - playbackState.effectiveStartTimeMilliseconds;
+        const source = context.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = playbackRate;
+        if (filterEnabled.current && filterNode.current && gainNode.current) {
+          source.connect(filterNode.current);
+          filterNode.current.connect(gainNode.current);
+        } else if (gainNode.current) {
+          source.connect(gainNode.current);
+        }
+        source.start(0, goToPositionMillis / 1000);
         playbackState.source.stop();
-
         setPlaybackState({
-          state: "stopped",
-          positionMilliseconds,
+          state: "playing",
+          effectiveStartTimeMilliseconds: Date.now() - goToPositionMillis,
+          source,
         });
-        setPlaybackRate(1);
       },
-      [playbackState]
+      [audioBuffer, playbackRate, playbackState, context]
   );
 
-  const pause = useCallback(() => stopAndGoTo(), [stopAndGoTo]);
+  const pause = useCallback(() => {
+    if (playbackState.state === "playing") {
+      playbackState.source.stop();
+      setPlaybackState({
+        state: "stopped",
+        positionMilliseconds: Date.now() - playbackState.effectiveStartTimeMilliseconds,
+      });
+    }
+  }, [playbackState]);
 
-  const stop = useCallback(() => stopAndGoTo(0), [stopAndGoTo]);
+  const stop = useCallback(() => {
+    if (playbackState.state === "playing") {
+      playbackState.source.stop();
+    }
+    setPlaybackState({
+      state: "stopped",
+      positionMilliseconds: 0,
+    });
+  }, [playbackState]);
 
   const handlePlaybackRateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newRate = parseFloat(event.target.value);
-
     if (playbackState.state === "playing") {
       playbackState.source.playbackRate.value = newRate;
     }
     setPlaybackRate(newRate);
   };
 
-  const handleSeek = (timeMillis: number) => {
-    if (playbackState.state === "playing") {
-      // If playing, stop the current source and create a new one
-      playbackState.source.stop();
-      const source = context.createBufferSource();
-      source.buffer = audioBuffer!;
-      source.playbackRate.value = playbackRate;
-
-      const effectiveStartTimeMilliseconds = Date.now() - timeMillis;
-
-      source.connect(context.destination);
-      source.start(0, timeMillis / 1000);
-
-      setPlaybackState({
-        state: "playing",
-        effectiveStartTimeMilliseconds,
-        source,
-      });
-    } else {
-      // If stopped, just update the position
-      setPlaybackState({
-        state: "stopped",
-        positionMilliseconds: timeMillis,
-      });
-    }
+  const handleFilterChange = (type: "lowpass" | "highpass", frequency: number) => {
+    setFilterType(type);
+    setFilterFrequency(frequency);
+    filterEnabled.current = true;
   };
 
   if (!audioBuffer) {
@@ -136,31 +137,42 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({
       <>
         <div className={styles.controls}>
           {playbackState.state === "playing" ? (
-              <button className={styles.button} onClick={pause}>Pause</button>
+              <button className={styles.button} onClick={pause}>
+                Pause
+              </button>
           ) : (
-              <button className={styles.button} onClick={play}>Play</button>
+              <button className={styles.button} onClick={play}>
+                Play
+              </button>
           )}
-          <button className={styles.button} onClick={stop}>Stop</button>
-        </div>
-        <div className={styles.speedBoxContainer}>
-          <div className={styles.speedBox}>
-            <label htmlFor="playbackRate">Playback Speed</label>
-            <input
-                className={styles.speedSlider}
-                type="range"
-                id="playbackRate"
-                min="0.5"
-                max="2"
-                step="0.1"
-                value={playbackRate}
-                onChange={handlePlaybackRateChange}
-            />
-            <span>{playbackRate.toFixed(2)}x</span>
+          <button className={styles.button} onClick={stop}>
+            Stop
+          </button>
+          <div className={styles.speedBoxContainer}>
+            <div className={styles.speedBox}>
+              <label>
+                Playback Speed ({playbackRate.toFixed(1)}x)
+                <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={playbackRate}
+                    onChange={handlePlaybackRateChange}
+                    className={styles.speedSlider}
+                />
+              </label>
+            </div>
           </div>
         </div>
+        <FilterControls
+            filterType={filterType}
+            frequency={filterFrequency}
+            onFilterChange={(type, freq) => handleFilterChange(type, freq)}
+        />
         <PlaybackBar
-            state={playbackState}
             totalTimeMilliseconds={audioBuffer.duration * 1000}
+            state={playbackState}
             onSeek={handleSeek}
         />
       </>
