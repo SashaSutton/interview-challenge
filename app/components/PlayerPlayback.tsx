@@ -102,9 +102,29 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({
   };
 
   const handleSeek = (timeMillis: number) => {
-    stopAndGoTo(timeMillis);
     if (playbackState.state === "playing") {
-      play();
+      // If playing, stop the current source and create a new one
+      playbackState.source.stop();
+      const source = context.createBufferSource();
+      source.buffer = audioBuffer!;
+      source.playbackRate.value = playbackRate;
+
+      const effectiveStartTimeMilliseconds = Date.now() - timeMillis;
+
+      source.connect(context.destination);
+      source.start(0, timeMillis / 1000);
+
+      setPlaybackState({
+        state: "playing",
+        effectiveStartTimeMilliseconds,
+        source,
+      });
+    } else {
+      // If stopped, just update the position
+      setPlaybackState({
+        state: "stopped",
+        positionMilliseconds: timeMillis,
+      });
     }
   };
 
