@@ -1,4 +1,4 @@
-// app/player/[fileId]/page.tsx
+
 import { Player } from '../../components/Player';
 
 export default function PlayerPage({ params }: { params: { fileId: string } }) {
