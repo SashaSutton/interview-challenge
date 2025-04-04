@@ -1,4 +1,3 @@
-// components/PlayerPlayback.tsx
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import { PlaybackBar } from "./PlaybackBar";
 import { FilterControls } from "./FilterControls";
@@ -21,35 +20,32 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({ context, audioBuffer }
     positionMilliseconds: 0,
   });
 
-  const filterEnabled = useRef<boolean>(false);
+  const filterEnabled = useRef<boolean>(true);
   const gainNode = useRef<GainNode | null>(null);
   const filterNode = useRef<BiquadFilterNode | null>(null);
 
-  // Helper function to validate frequency
   const validateFrequency = (freq: number): number => {
     if (!isFinite(freq) || isNaN(freq)) return 1000;
     return Math.max(20, Math.min(20000, freq));
   };
 
-  // Initialize audio nodes
   useEffect(() => {
     gainNode.current = context.createGain();
     filterNode.current = context.createBiquadFilter();
     if (filterNode.current) {
       filterNode.current.type = settings.filter.type;
       filterNode.current.frequency.value = validateFrequency(settings.filter.frequency);
+      filterNode.current.connect(gainNode.current!);
     }
     gainNode.current.connect(context.destination);
   }, [context]);
 
-  // Update filter type when settings change
   useEffect(() => {
     if (filterNode.current) {
       filterNode.current.type = settings.filter.type;
     }
   }, [settings.filter.type]);
 
-  // Update filter frequency when settings change
   useEffect(() => {
     if (filterNode.current) {
       const safeFrequency = validateFrequency(settings.filter.frequency);
@@ -65,9 +61,8 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({ context, audioBuffer }
     source.buffer = audioBuffer;
     source.playbackRate.value = Math.max(0.1, Math.min(4, settings.playbackSpeed));
 
-    if (filterEnabled.current && filterNode.current && gainNode.current) {
+    if (filterNode.current && gainNode.current) {
       source.connect(filterNode.current);
-      filterNode.current.connect(gainNode.current);
     } else if (gainNode.current) {
       source.connect(gainNode.current);
     }
@@ -114,9 +109,8 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({ context, audioBuffer }
         source.buffer = audioBuffer;
         source.playbackRate.value = Math.max(0.1, Math.min(4, settings.playbackSpeed));
 
-        if (filterEnabled.current && filterNode.current && gainNode.current) {
+        if (filterNode.current && gainNode.current) {
           source.connect(filterNode.current);
-          filterNode.current.connect(gainNode.current);
         } else if (gainNode.current) {
           source.connect(gainNode.current);
         }
@@ -152,7 +146,6 @@ export const PlayerPlayback: FC<PlayerPlaybackProps> = ({ context, audioBuffer }
         frequency: safeFrequency
       }
     });
-    filterEnabled.current = true;
   };
 
   if (!audioBuffer) {

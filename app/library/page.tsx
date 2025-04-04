@@ -1,4 +1,4 @@
-
+// app/library/page.tsx
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -120,11 +120,7 @@ export default function LibraryPage() {
                 <div className={styles.fileList}>
                     {files.length === 0 ? (
                         <div className={styles.noFiles}>
-                            <svg className={styles.emptyIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M12 5v14M5 12h14" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
                             <p>No audio files uploaded yet</p>
-                            <p className={styles.emptySubtext}>Upload your first audio file to get started</p>
                         </div>
                     ) : (
                         files.map((file) => (
@@ -167,7 +163,7 @@ export default function LibraryPage() {
                                         className={`${styles.actionButton} ${styles.deleteButton}`}
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={styles.buttonIcon}>
-                                            <path d="M19 7l-3 13H8L5 7M20 7H4M10 11V17M14 11V17M12 4c1.1 0 2 .9 2 2H8c0-1.1.9-2 2-2z" strokeWidth="2"/>
+                                            <path d="M19 7l-3 13H8L5 7M20 7H4M10 11V17M14 11V17" strokeWidth="2"/>
                                         </svg>
                                         Delete
                                     </button>

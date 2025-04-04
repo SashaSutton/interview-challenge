@@ -1,4 +1,4 @@
-// app/api/library/route.ts
+
 import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { FILES_DIR } from '../../storage/constants';

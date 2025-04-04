@@ -1,7 +1,7 @@
-// app/api/settings/route.ts
+
 import { NextResponse } from 'next/server';
 import { getDataForCurrentUser, updateDataForCurrentUser } from '@/app/storage/user-data';
-// or if your storage folder is in the root:
+
 // import { getDataForCurrentUser, updateDataForCurrentUser } from '@/storage/user-data';
 
 export async function GET() {
