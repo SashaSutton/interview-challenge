@@ -1,3 +1,4 @@
+
 "use client";
 import { FC } from "react";
 import styles from "./FilterControls.module.css";
@@ -9,8 +10,8 @@ type FilterControlsProps = {
 };
 
 export const FilterControls: FC<FilterControlsProps> = ({
-                                                            filterType,
-                                                            frequency,
+                                                            filterType = "lowpass",  // Add default value
+                                                            frequency = 1000,        // Add default value
                                                             onFilterChange,
                                                         }) => {
     const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -22,6 +23,9 @@ export const FilterControls: FC<FilterControlsProps> = ({
         const newFrequency = parseFloat(event.target.value);
         onFilterChange(filterType, newFrequency);
     };
+
+
+    const displayFrequency = typeof frequency === 'number' ? frequency.toFixed(0) : '1000';
 
     return (
         <div className={styles.filterCard}>
@@ -38,7 +42,7 @@ export const FilterControls: FC<FilterControlsProps> = ({
             </div>
             <div className={styles.filterRow}>
                 <label className={styles.filterLabel}>
-                    Frequency: {frequency.toFixed(0)} Hz
+                    Frequency: {displayFrequency} Hz
                     <input
                         type="range"
                         min="20"
