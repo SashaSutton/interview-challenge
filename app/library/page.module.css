@@ -1,0 +1,160 @@
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 2rem;
+}
+
+.uploadSection {
+    margin-bottom: 2rem;
+}
+
+.uploadButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #0070f3;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.uploadButton:hover {
+    background-color: #0051cc;
+    transform: translateY(-1px);
+}
+
+.uploadIcon {
+    width: 20px;
+    height: 20px;
+}
+
+.fileList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.fileItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.fileItem:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+}
+
+.fileInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.fileName {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+    cursor: pointer;
+}
+
+.fileName:hover {
+    color: #0070f3;
+}
+
+.renameInput {
+    font-size: 1.1rem;
+    padding: 0.25rem 0.5rem;
+    border: 2px solid #0070f3;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.uploadDate {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.fileActions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.actionButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.playButton {
+    background-color: #0070f3;
+    color: white;
+}
+
+.playButton:hover {
+    background-color: #0051cc;
+}
+
+.deleteButton {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.deleteButton:hover {
+    background-color: #fecaca;
+}
+
+.buttonIcon {
+    width: 18px;
+    height: 18px;
+}
+
+.noFiles {
+    text-align: center;
+    padding: 3rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.emptyIcon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    color: #666;
+}
+
+.emptySubtext {
+    color: #666;
+    margin-top: 0.5rem;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
