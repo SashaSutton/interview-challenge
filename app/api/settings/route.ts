@@ -1,6 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { getDataForCurrentUser, updateDataForCurrentUser } from '@/app/storage/user-data';
+import {AUDIO_SETTINGS_DATA, getDataForCurrentUser, updateDataForCurrentUser} from '@/app/storage/user-data';
 
 // import { getDataForCurrentUser, updateDataForCurrentUser } from '@/storage/user-data';
 
@@ -20,18 +20,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
-        console.log('POST settings received:', body);
+        const audioSettings = AUDIO_SETTINGS_DATA.parse(await request.json());
+        console.log('POST settings received:', audioSettings);
 
         const updated = await updateDataForCurrentUser((current) => ({
             ...current,
-            audioSettings: {
-                playbackSpeed: body.audioSettings.playbackSpeed,
-                filter: {
-                    type: body.audioSettings.filter.type,
-                    frequency: body.audioSettings.filter.frequency
-                }
-            }
+            audioSettings: audioSettings
         }));
 
         console.log('POST settings updated:', updated);
@@ -44,3 +38,4 @@ export async function POST(request: Request) {
         );
     }
 }
+

@@ -52,9 +52,9 @@ export function useAudioSettings() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    audioSettings: newSettings
-                }),
+                body: JSON.stringify(
+                    newSettings
+                ),
             });
 
             if (!response.ok) {

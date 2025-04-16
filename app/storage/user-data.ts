@@ -7,15 +7,21 @@ import path from "path";
 import { USER_DATA_DIR } from "./constants";
 import { readFile, mkdir, writeFile } from "fs/promises";
 
+
+export const AUDIO_SETTINGS_DATA = z.object({
+  playbackSpeed: z.number().default(1),
+  filter: z.object({
+    type: z.enum(['highpass', 'lowpass']).default('lowpass'),
+    frequency: z.number().default(1000)
+  }).default({})
+});
+
+export type AudioSettingsData = z.infer<typeof AUDIO_SETTINGS_DATA>;
+
+
 export const USER_DATA = z.object({
   firstPageLoad: z.string().nullable(),
-  audioSettings: z.object({
-    playbackSpeed: z.number().default(1),
-    filter: z.object({
-      type: z.enum(['highpass', 'lowpass']).default('lowpass'),
-      frequency: z.number().default(1000)
-    }).default({})
-  }).default({})
+  audioSettings: AUDIO_SETTINGS_DATA
 });
 
 export type UserData = z.infer<typeof USER_DATA>;
