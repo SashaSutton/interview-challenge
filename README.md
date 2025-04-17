@@ -1,4 +1,4 @@
-# Boiler Room Interview Challenge
+# Interview Challenge
 
 This challenge is comprised of a Next.js app that you can run locally,
 and a number of tasks for you to complete.
